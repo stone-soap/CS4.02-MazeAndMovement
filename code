@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="iu">
+	<head>
+		<meta charset="UTF-8">
+		<title>Maze and movement</title>
+		<meta name="description" content="Maze and movement">
+		<meta name="author" content="-kris-">
+		<!--
+			Change log:
+				Created:	18. November 2015									- Drapak
+				Modified:	4. May 2017			- reworked for better style		- Drapak
+							16. December 2024 	- made copy, began adding 		- kris 
+							17. December 2024 	- define(d) objects, array? 	- kris
+							18. December 2024   - geeeking out, gonna lose it   - kris :(
+							20. December 2024 	- tired :( 						- kris
+							6.  January  2025	- back again 					- kris 
+							8.  January  2025   - bro what is going on 			- kris 
+							
+				Finished:	
+		-->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js">
+		</script>
+
+
+		<style>
+
+			body {
+				background-color: #FAD6DF;
+			}
+
+			#heading {
+				color:  #BF739D;
+			}
+
+			button {
+				background-color: #FAD6DF;
+				color:  #BF739D;
+				border:   2px solid #BF739D;				
+			}
+
+			img {
+				position: absolute;
+				height: 50px;
+				width: 50px;
+			}
+
+			#outputId {
+				position: absolute;
+				top: 15%;
+				opacity: 0;
+			}
+
+			#linkBox {
+				position: absolute;
+				top: 15%;
+			}
+
+
+
+			#roachButton {
+				position: absolute;
+				background-color: #FAD6DF;
+				color:  #FAD6DF;
+				border:   2px solid #FAD6DF;								
+				left: 50%;
+			}
+
+
+		</style>
+	</head>
+
+	<!--
+		EVALUATION:
+		
+		___/10 INIT: including
+				[-] create an array of arrays
+				[-] create an object for the maze with properties and methods
+				[-] create an object for the animated character with properties and methods        IFFY
+				[-] access properties within an object using this.
+				[-] link to jQuery
+		___/10 PROCESS: including
+				[-] use nested loops to generate a maze
+				[-] use if statements to determine which image to show in the maze
+				[-] use if statements to do something different for each direction key 				IFFY
+:(				[-] use math to determine a top and left position for each maze image
+				[-] use math to determine a top and left position for the animated character 		WORKING ON 
+		___/10 OUTPUT: including
+				[-] use .innerHTML to add code to your page 										IFFY, ASK ABT
+				[-] use .src to change an image
+(opacity)		[-] fade something in from invisible to visible
+				[-] animate movement using jQuery
+				[-] change the movement easing in jQuery to "linear"
+		___/10 STYLE: including
+				[-] honour all previous //STYLE sections
+				[-] use descriptive variable names
+				[-] break up methods and function into separate ones for input, processing, 
+					 and output
+				[-] use descriptive comments to identify and describe each method or 
+					 function, and each loop
+				[-] add spaces between mathematical and string operators
+				
+
+https://drapak.ca/cpg/MazeAndMovement.shtml 						** assignment 
+https://drapak.ca/cpg/processUsingTwoDimensionalArrays.shtml 		** nested loops
+https://drapak.ca/cpg/initObjectsWithMethods.shtml 					** methods
+https://drapak.ca/cpg/initTwoDimensionalArrays.shtml
+
+
+------------STYLE GUIDE FOR LONG LINES: DO NOT PASS COLUMN 95 -------------------------------|			
+	-->
+
+	<body>
+		<h1 id="heading">˖⁺‧₊˚4.02: Hand-in: Make a maze and something to move on it.˚₊‧⁺˖</h1>
+		
+		<div id ="outputId"></div>
+		<div id ="linkBox"></div>
+
+
+		<button id="mazeButton">⋆˚✿˖°Show the maze°˖✿˚⋆</button>
+		<button id="characterButton">✶⋆.˚create the critter˚.⋆✶</button>
+		<button id="roachButton">ughhhhhhhhhhhhhhhhh</button>
+
+
+ 		<script>
+
+ 		//INIT - STARTING THE ARRAY
+
+			var mazeObj = {
+ 				id: 			"maze",
+ 				src: 			"tileArr",
+ 				imageSize: 		50,   //set up the size of each image
+ 			};
+			
+			mazeObj.imageSourceArr = [
+				"http://drapak.ca/cpg/img/DirtBlock.png", 	//0
+				"http://drapak.ca/cpg/img/GrassBlock.png", 	//1
+				"http://drapak.ca/cpg/img/PlainBlock.png", 	//2
+				"http://drapak.ca/cpg/img/WaterBlock.png"	//3
+			];
+
+			var initImgArr = function (){
+
+			    mazeObj.tileArr = [ 
+					[1,2,1,1,1,1,1,1,2,1,2,1,1,1,1,1],
+					[1,2,0,0,0,0,0,1,2,2,2,2,2,0,0,1],
+					[1,2,2,2,3,3,2,2,3,3,3,3,2,3,0,1],
+					[1,0,0,2,3,2,2,1,0,2,2,2,2,3,2,2],
+					[1,3,0,2,3,2,3,1,0,2,3,3,3,3,2,1],
+					[1,3,0,2,3,2,0,2,2,2,2,2,2,2,2,1],
+					[1,3,0,2,2,2,1,2,1,0,3,2,3,3,0,1],
+					[1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,1],
+					[1,2,2,2,0,0,1,2,2,1,0,2,2,2,2,1],
+					[2,2,3,3,3,2,0,1,2,0,3,3,3,3,2,1],
+					[2,3,3,3,3,2,2,1,2,2,2,2,3,3,2,1],
+					[2,3,2,2,2,3,2,1,2,3,3,2,3,3,2,1],
+					[2,2,2,3,2,2,2,1,2,2,3,2,3,2,2,1],
+					[1,0,3,3,2,3,0,1,0,2,3,2,3,2,0,1],
+					[1,0,0,0,2,2,2,1,2,2,0,0,0,2,2,2],
+					[1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1]
+				];
+
+				return mazeObj.tileArr;
+			}
+
+			//PROCESS
+ 			mazeObj.createMaze = function(){
+
+ 				//create nested for loops Row and then column
+ 				//NESTED INSIDE THE FOR LOOPS - DO EVERYTHING INT HE LOPPS OGHHH
+
+ 				//At each number, 
+ 				//1) Create new image element 
+ 				//2) Attach the appropriate source
+ 				//3) Add style to properly place it, based on the two loop positions.
+
+ 				//loop through each ROW 
+ 				var mazeCode        = "";   //define an empty string
+
+ 				for (row in this.tileArr) {
+ 					//loop through each COLUMN
+ 					for (column in this.tileArr [row] ) {
+
+ 						var newImage = document.createElement( "img" );
+
+ 						//create your if else statements 
+ 						if (this.tileArr [row][column] == 0 ){
+ 							newImage.src = "http://drapak.ca/cpg/img/DirtBlock.png";
+ 						}
+
+ 						if (this.tileArr [row][column] == 1 ){
+ 							newImage.src = "http://drapak.ca/cpg/img/GrassBlock.png";
+ 						}
+
+ 						if (this.tileArr [row][column] == 2 ){
+ 							newImage.src = "http://drapak.ca/cpg/img/PlainBlock.png";
+ 						}
+
+ 						if (this.tileArr [row][column] == 3 ){
+ 							newImage.src = "http://drapak.ca/cpg/img/WaterBlock.png";
+ 						}
+
+ 						var topLocation = (row * this.imageSize) + "px";
+ 						var leftLocation = (column * this.imageSize) + "px";
+ 						//attach this style to the element
+
+ 						newImage.style.top = topLocation;
+ 						newImage.style.left = leftLocation;
+ 						console.log('Sending to output');
+ 						mazeObj.outputMazeCode(newImage);
+ 					}
+
+ 				}
+ 				//SEND THIS ELEMENT TO OUTPUT
+ 				return this.tileArr;
+ 				console.log('returned array');	
+
+ 			}
+
+			//INPUT
+			document.querySelector('#mazeButton').onclick = function (){
+				console.log ('main procedure :P');
+
+				mazeObj.tileArr = initImgArr();
+				console.log ('mazeObj.tileArr: ' + mazeObj.tileArr);
+				mazeObj.createMaze(); //will create and immediately output
+				
+			}
+
+
+
+
+
+
+
+
+ 		//INIT - define objects: 
+ 			
+ 			var characterObj = {
+ 				id: 			"linkImg",
+  				srcUp:			"http://drapak.ca/cpg/img/sprites/link-up.png",
+ 				srcDown: 		"http://drapak.ca/cpg/img/sprites/link-down.png",
+ 				srcLeft: 		"http://drapak.ca/cpg/img/sprites/link-left.png",
+ 				srcRight: 		"http://drapak.ca/cpg/img/sprites/link-right.png", 
+ 				distance:       50,
+ 				row: 0,
+ 				column: 0,
+ 				//properties
+
+ 				//methods, animateUp, animateDown, animateLeft, animateRight
+ 			};  
+ 			console.log('init? okay this is being read');
+ 			//WORKS 
+
+
+ 		//INPUT - readkeypress + keyevent
+			characterObj.readKeyPress = function(keyEvent){
+				console.log('in the reading of keypresses..')
+				var unicodeNumber = keyEvent.which || keyEvent.keyCode; 
+				//get keypress then return it
+				console.log(unicodeNumber);
+				return unicodeNumber; //send the character pressed
+			} 	//THIS ALL WORKS
+
+		//INPUT - clicking the button
+			document.querySelector('#characterButton').onclick = function() {
+				console.log ('GET LINK IN HERE !!!!');
+				characterObj.outputLink();
+			} 	//WORKS
+
+
+		//PROCESS -				NONE OF THIS IS BEING READ \/
+
+			characterObj.processKeypress = function(unicodeNumber){
+				console.log('process freaktion '+ unicodeNumber);
+
+ 				var newImage = document.createElement( "img" );
+
+
+				if (unicodeNumber == 87){		//up animation, makes him go up
+					newImage.src = this.srcUp;
+					this.row = this.row - 1;
+					this.animateUp();
+					console.log(this.row, this.column);					
+				}
+
+				else if (unicodeNumber == 83){		//down animation, makes him go down
+					newImage.src = this.srcDown;
+					this.row = this.row + 1;
+					this.animateDown();
+					console.log(this.row, this.column);					
+				}
+				
+				else if (unicodeNumber == 65){		//left animation, makes him go left
+					newImage.src = this.srcLeft;					
+					this.column = this.column - 1;
+					this.animateLeft();
+					console.log(this.row, this.column);					
+				}
+				
+				else if (unicodeNumber == 68){		//right animation, makes him go right
+					newImage.src = this.srcRight;
+					this.column = this.column + 1;
+					this.animateRight();					
+					console.log(this.row, this.column);					
+				}				
+				
+				var topLinkLocation = ( this.imageSize) + "px";
+ 				var leftLinkLocation = ( this.imageSize) + "px";
+ 				//attach this style to the element
+ 				console.log('HELP MEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE');
+
+ 				newImage.style.top = topLinkLocation;
+ 				newImage.style.left = leftLinkLocation;
+ 				characterObj.outputLink(newImage);
+  				characterObj.outputLink(characterObj.processKeypress);
+
+			}
+
+			//STARTS BEING READ AGAIN HERE \/ ????????????????????????????????????????
+
+
+		//OUTPUT     **moving link 
+			characterObj.animateUp = function (){
+				document.querySelector("#" + this.id).src = this.srcUp;				
+				$( "#" + this.id).animate(
+					{top: '-=' + this.distance + 'px'}, { easing: "linear" } );
+					console.log('link up');	
+			}
+
+		//ANIMATE DOWN
+			characterObj.animateDown = function (){
+				console.log(this.id);
+				document.querySelector("#" + this.id).src = this.srcDown;								
+				$( "#" + this.id).animate(
+					{top: '+=' + this.distance + 'px'}, { easing: "linear" } );
+					console.log('link down');	
+			}
+
+		//ANIMARE LETFT
+
+			characterObj.animateLeft = function (){
+				document.querySelector("#" + this.id).src = this.srcLeft;				
+				$( "#" + this.id).animate(
+					{left: '-=' + this.distance + 'px'}, { easing: "linear" } );
+					console.log('link left');	
+			}
+
+		//ANIMATE RIGHT
+
+			characterObj.animateRight = function (){
+				document.querySelector("#" + this.id).src = this.srcRight;								
+				$( "#" + this.id).animate(
+					{left: '+=' + this.distance + 'px'}, { easing: "linear" } );
+					console.log('link right');	
+			}			
+
+			//STARTS BEING READ AGAIN HERE \/
+
+
+			var moveLinkMainFunction = function (keyEvent){
+				
+				var uniNum = characterObj.readKeyPress(keyEvent);
+				characterObj.processKeypress(uniNum);
+
+
+				console.log('main link function');
+			}
+
+
+//				newLinkImage.src = this.srcDown;
+
+
+			//LINK?? WHAT IS THIS FOR T-T	
+			characterObj.outputLink = function () {  
+				var newLinkImage = document.createElement( "img" );
+				newLinkImage.src = 'https://stardewvalleywiki.com/mediawiki/images/d/db/Starfruit.png';
+				newLinkImage.id = this.id;
+				newLinkImage.style.position = "absolute";
+				document.querySelector( '#linkBox' ).appendChild(newLinkImage);
+				console.log('link button?');
+			}
+
+			var roach = function () {
+				console.log('run roach?');
+				document.body.style.color 				= 'gray';
+				document.body.style.backgroundColor 	= 'black';				
+				document.querySelector("#outputId").innerHTML ="<img id='roachKing'src='https://static.wikia.nocookie.net/fearandhunger/images/9/9e/12.png/revision/latest?cb=20171209170152'>";
+			}
+
+
+
+
+
+			document.querySelector('#roachButton').onclick = roach;
+				console.log('roach');
+			//OUTPUT: this puts the grid information inside the div called #outputId
+			mazeObj.outputMazeCode = function ( newImage ) {  
+			    document.querySelector( '#outputId' ).appendChild(newImage);
+				$( '#outputId' ).animate( {opacity: 1}, {duration: 1000} );
+				
+			}
+
+			window.onkeydown    = moveLinkMainFunction;
+
+		</script>
+	</body>
+</html>
